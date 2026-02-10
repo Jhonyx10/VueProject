@@ -1,25 +1,42 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import PatientAppointment from '@/Pages/Appointments/PatientAppointment.vue';
+import DoctorsAppointments from '@/Pages/Appointments/DoctorsAppointments.vue';
+import AdminAppointmentView from '@/Pages/Appointments/AdminAppointmentView.vue'
+import { useRole } from '@/composables/useRole';
 import { Head } from '@inertiajs/vue3';
+
+const props = defineProps({
+    appointments: Array,
+    doctors: Array
+});
+
+const { isDoctor, isUser, isAdmin } = useRole();
 </script>
 
 <template>
     <Head title="Appointments" />
 
     <AuthenticatedLayout>
-        <div class="mt-6">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-               Appointments
-            </h2>
-        </div>
-
-        <div class="py-6">
+        <div class="py-4 bg-slate-50 min-h-screen">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        You're logged in!
-                    </div>
-                </div>
+                
+                <section v-if="isUser">
+                    <PatientAppointment :appointments="appointments" :doctors="doctors"/>
+                </section>
+
+                <section v-if="isDoctor">
+                    <DoctorsAppointments
+                        :appointments="appointments"
+                    />
+                </section>
+
+                <section v-if="isAdmin">
+                    <AdminAppointmentView
+                        :appointments="appointments"
+                        :doctors="doctors"
+                    />
+                </section>
             </div>
         </div>
     </AuthenticatedLayout>

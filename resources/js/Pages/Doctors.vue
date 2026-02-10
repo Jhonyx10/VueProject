@@ -8,12 +8,13 @@ import DoctorCard from '@/Pages/Doctors/DoctorCard.vue';
 defineProps({
     doctors: Array
 });
+
 </script>
 
 <template>
     <Head title="Doctor's List" />
    <AuthenticatedLayout>
-      <div class="max-w-screen mt-6">
+      <div class="max-w-screen m-6">
         <div class="flex justify-between items-center">
               <h2 class="text-xl font-semibold text-gray-800">Doctors List</h2>
               <DoctorsForm />

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use MongoDB\Laravel\Eloquent\Model;
+use MongoDB\Laravel\Relations\hasOne;
 
 class User extends Authenticatable
 {
@@ -29,6 +30,23 @@ class User extends Authenticatable
         'role',
     ];
 
+    public function isDoctor(): bool
+    {
+        return $this->role === 'doctor';
+    }
+
+    // Helper to check if user is a Patient
+    public function isPatient(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    public function doctorProfile()
+    {
+        // This links to the 'doctors' collection we discussed earlier
+        return $this->hasOne(Doctor::class, 'user_id');
+    }
+    
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -14,6 +14,7 @@ class Doctor extends Model
     protected $collection = 'doctors';
 
     protected $fillable = [
+        'user_id',
         'firstName',
         'lastName',
         'age',
@@ -21,4 +22,9 @@ class Doctor extends Model
         'address',
         'expertise'
     ];
+
+    public function user()
+    {
+        return $this->hasOne(Doctor::class, 'user_id');
+    }
 }

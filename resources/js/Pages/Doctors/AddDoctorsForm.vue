@@ -6,68 +6,89 @@ import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { UserPlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 
 const openForm = ref(false);
-
 const formOpen = () => (openForm.value = true);
 
 const closeModal = () => {
     openForm.value = false;
     form.reset();
+    form.clearErrors();
 };
 
 const form = useForm({
-  name: '',
-  email: '',
-  password: ''
+    name: '',
+    email: '',
+    password: '',
+    role: 'doctor'
 });
 
 const submitForm = () => {
-    form.post('/doctor', {
-        onSuccess: () => {
-        closeModal();
-        form.clearErrors();
-        form.reset();
-    },
+    form.post('register/doctor', {
+        onSuccess: () => closeModal(),
+        preserveScroll: true,
     });
 };
 </script>
 
 <template>
-    <section class="space-y-6">
-        <PrimaryButton @click="formOpen">Add Doctor</PrimaryButton>
+    <section>
+        <PrimaryButton @click="formOpen"
+            class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-100 transition-all py-2.5">
+            <UserPlusIcon class="h-5 w-5" />
+            Add New Doctor
+        </PrimaryButton>
 
-        <Modal :show="openForm" @close="closeModal">
-            <div class="p-6">
-                <h2 class="text-lg font-bold mb-4">Add Doctor</h2>
-
-                <form @submit.prevent="submitForm" class="space-y-4">
-                    <div class="flex gap-2">
-                        <div>
-                            <InputLabel for="name" value="User Name" />
-                            <TextInput id="name" v-model="form.name" class="mt-1 block w-full" />
-                            <InputError :message="form.errors.name" class="mt-2" />
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between">
-                        <div>
-                            <InputLabel for="email" value="Email" />
-                            <TextInput id="email" type="email" v-model="form.email" class="mt-1 block w-full" />
-                            <InputError :message="form.errors.email" class="mt-2" />
-                        </div>
-                    </div>
-
+        <Modal :show="openForm" @close="closeModal" maxWidth="md">
+            <div class="overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div>
-                        <InputLabel for="password" value="Password" />
-                        <TextInput id="password" type="password" v-model="form.password" class="mt-1 block w-full" />
-                        <InputError :message="form.errors.password" class="mt-2" />
+                        <h2 class="text-xl font-bold text-slate-800">Create Doctor Account</h2>
+                        <p class="text-sm text-slate-500 mt-1">Fill in the details to register a new medical professional.
+                        </p>
+                    </div>
+                    <button @click="closeModal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <XMarkIcon class="h-6 w-6" />
+                    </button>
+                </div>
+
+                <form @submit.prevent="submitForm" class="p-8 space-y-5">
+                    <div class="space-y-1.5">
+                        <InputLabel for="name" value="Full Name" class="text-slate-700 font-semibold ml-0.5" />
+                        <div class="relative">
+                            <TextInput id="name" v-model="form.name" placeholder="Dr. John Doe"
+                                class="mt-1 block w-full border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm transition-all" />
+                        </div>
+                        <InputError :message="form.errors.name" />
                     </div>
 
-                    <div class="flex justify-end mt-4 space-x-2">
-                        <PrimaryButton type="button" @click="closeModal" class="bg-gray-300 text-black">Cancel
+                    <div class="space-y-1.5">
+                        <InputLabel for="email" value="Professional Email" class="text-slate-700 font-semibold ml-0.5" />
+                        <TextInput id="email" type="email" v-model="form.email" placeholder="doctor@clinic.com"
+                            class="mt-1 block w-full border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm transition-all" />
+                        <InputError :message="form.errors.email" />
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <InputLabel for="password" value="Temporary Password" class="text-slate-700 font-semibold ml-0.5" />
+                        <TextInput id="password" type="password" v-model="form.password" placeholder="••••••••"
+                            class="mt-1 block w-full border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm transition-all" />
+                        <p class="text-[11px] text-slate-400 mt-1 italic">The doctor will be prompted to change this upon
+                            first login.</p>
+                        <InputError :message="form.errors.password" />
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100 mt-8">
+                        <button type="button" @click="closeModal"
+                            class="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                            Cancel
+                        </button>
+                        <PrimaryButton type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
+                            class="bg-indigo-600 hover:bg-indigo-700 px-8 py-2.5 rounded-xl shadow-lg shadow-indigo-100">
+                            <span v-if="form.processing">Processing...</span>
+                            <span v-else>Register Doctor</span>
                         </PrimaryButton>
-                        <PrimaryButton type="submit" :disabled="form.processing">Save</PrimaryButton>
                     </div>
                 </form>
             </div>

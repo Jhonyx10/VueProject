@@ -22,6 +22,8 @@
     "@inertiajs/vue3": "^2.0.0",
     "@vueuse/motion": "^3.0.3",
     "axios": "^1.11.0",
-    "vue": "^3.4.0"
+    "chart.js": "^4.5.1",
+    "vue": "^3.4.0",
+    "vue-chartjs": "^5.3.3"
   }
 }

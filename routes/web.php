@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DoctorsController;
+use App\Http\Controllers\RegisterDoctorController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,31 +19,34 @@ Route::get('/', function () {
     ]);
 });
 
+// Main Auth Group
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // admin routes.
-    Route::middleware(['auth', 'role:admin'])->group(function () {
-        Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-        })->name('dashboard');
+   Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
+    Route::resource('chat', ChatController::class);
+    Route::resource('appointments', AppointmentController::class);
+    // Admin & Doctor Shared Routes
+    // Note: 'auth' is already applied by the outer group
+    Route::middleware(['role:admin'])->group(function () {
+        Route::resource('/register/doctor', RegisterDoctorController::class);
         Route::get('/doctors', [DoctorsController::class, 'index'])->name('doctors');
         Route::resource('doctor', DoctorsController::class)->except(['index']);
     });
 
-    //doctor routes.
-    Route::middleware(['auth', 'role:doctor'])->group(function () {
-
+    // Doctor Only Routes
+    Route::middleware(['role:doctor'])->group(function () {
+        // Specific doctor routes here
     });
 
-    //user routes.
-    Route::middleware(['auth', 'role:user'])->group(function () {
-
+    // User Only Routes
+    Route::middleware(['role:user'])->group(function () {
+        // Specific user routes here
     });
 
-    Route::resource('appointments', AppointmentController::class);
 });
 
+// Profile Routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
