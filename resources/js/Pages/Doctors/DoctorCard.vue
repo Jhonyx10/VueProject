@@ -1,6 +1,6 @@
 <template>
   <div
-    class="group bg-white border border-slate-200 shadow-sm rounded-2xl p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-300 ease-in-out max-w-sm relative overflow-hidden">
+    class="group bg-white border mt-4 border-slate-200 shadow-sm rounded-2xl p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-300 ease-in-out max-w-sm relative overflow-hidden">
     <div
       class="absolute top-0 right-0 -mt-4 -mr-4 h-16 w-16 bg-indigo-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500">
     </div>

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\AppointmentRequest;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Enums\AppointmentStatus;
 
 class AppointmentController extends Controller
 {
@@ -17,7 +18,8 @@ class AppointmentController extends Controller
    public function index()
     {
         return Inertia::render('Appointments', [
-            'appointments' => Appointment::with(['doctor.doctorProfile', 'patient'])->get(),
+            'appointments' => Appointment::with(['doctor.doctorProfile', 'patient'])
+                ->orderBy('date')->get(),
             
             'doctors' => User::where('role', 'doctor')
                 ->with('doctorProfile') 
@@ -72,9 +74,23 @@ class AppointmentController extends Controller
      */
     public function update(Request $request, Appointment $appointment)
     {
-        //
-    }
+        $status = match($request->action) {
+            'confirm' => AppointmentStatus::CONFIRMED->value,
+            'cancel'  => AppointmentStatus::CANCELLED->value,
+            default   => $appointment->status,
+        };
 
+        $appointment->update([
+            'status' => $status,
+            'reason' => $request->action === 'cancel' ? $request->reason : null
+        ]);
+
+        $message = $request->action === 'cancel' 
+            ? 'Appointment cancelled.' 
+            : 'Appointment confirmed successfully!';
+
+        return redirect()->back()->with('success', $message);
+    }
     /**
      * Remove the specified resource from storage.
      */

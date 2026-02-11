@@ -26,7 +26,8 @@ class AppointmentRequest extends FormRequest
             'doctor_id' => 'required|exists:users,_id', 
             'date' => 'required|date|after_or_equal:today',
             'time' => 'required',
-            'notes' => 'nullable|string|max:500' // Better to be nullable if optional
+            'notes' => 'nullable|string|max:500', // Better to be nullable if optional
+            'reason' => 'nullable|string|max:500'
         ];
     }
 }

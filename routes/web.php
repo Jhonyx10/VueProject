@@ -6,6 +6,7 @@ use App\Http\Controllers\RegisterDoctorController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiagnosisController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,8 +27,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('chat', ChatController::class);
     Route::resource('appointments', AppointmentController::class);
-    // Admin & Doctor Shared Routes
-    // Note: 'auth' is already applied by the outer group
+    Route::resource('diagnosis', DiagnosisController::class)->parameters(['diagnosis' => 'diagnosis' ]);
+
     Route::middleware(['role:admin'])->group(function () {
         Route::resource('/register/doctor', RegisterDoctorController::class);
         Route::get('/doctors', [DoctorsController::class, 'index'])->name('doctors');
@@ -36,12 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Doctor Only Routes
     Route::middleware(['role:doctor'])->group(function () {
-        // Specific doctor routes here
+        Route::get('/diagnosis/form', [DiagnosisController::class, 'create'])->name('diagnosis.create');
     });
 
     // User Only Routes
     Route::middleware(['role:user'])->group(function () {
-        // Specific user routes here
+
     });
 
 });

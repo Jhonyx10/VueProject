@@ -4,6 +4,8 @@ namespace App\Models;
 
 use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Relations\BelongsTo;
+use MongoDB\Laravel\Relations\hasOne;
+use App\Enums\AppointmentStatus;
 
 class Appointment extends Model
 {
@@ -17,9 +19,14 @@ class Appointment extends Model
         'time',
         'notes',
         'patient_id',
-        'status'
+        'status',
+        'reason',
     ];
 
+    protected $casts = [
+        'status' => AppointmentStatus::class,
+    ];
+    
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'doctor_id');
@@ -31,5 +38,10 @@ class Appointment extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'patient_id');
+    }
+
+    public function diagnosis(): hasOne
+    {
+        return $this->hasOne(Diagnosis::class, 'appointment_id');
     }
 }

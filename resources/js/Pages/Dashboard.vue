@@ -2,12 +2,16 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { useRole } from '@/composables/useRole';
 import AdminDashboard from '@/Pages/Dashboard/AdminDashboard.vue'
+import DoctorsDashboard from '@/Pages/Dashboard/DoctorsDashboard.vue'
 import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({
     doctorsCount: Number,
     usersCount: Number,
-    appPendingCount: Number
+    appPendingCount: Number,
+    upcomingAppointment: Object,
+    monthlyAppointmentCount: Array,
+    appointmentStatusCount: Array
 });
 
 const { isAdmin, isDoctor, isUser} = useRole();
@@ -24,6 +28,13 @@ const { isAdmin, isDoctor, isUser} = useRole();
                     :doctorsCount="doctorsCount"
                     :usersCount="usersCount"
                     :appPendingCount="appPendingCount"
+                    :monthlyAppointmentCount="monthlyAppointmentCount"
+                    :appointmentStatusCount="appointmentStatusCount"
+                 />
+                </section>
+                 <section v-if="isDoctor">
+                    <DoctorsDashboard
+                    :upcomingAppointment="upcomingAppointment"
                  />
                 </section>
             </div>

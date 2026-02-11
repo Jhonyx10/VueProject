@@ -47,6 +47,16 @@ class User extends Authenticatable
         return $this->hasOne(Doctor::class, 'user_id');
     }
     
+     public function doctor(): belongsTo
+    {
+        return $this->belongsTo(Diagnosis::class, 'doctor_id');
+    }
+
+     public function patient(): belongsTo
+    {
+        return $this->belongsTo(Diagnosis::class, 'patient_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

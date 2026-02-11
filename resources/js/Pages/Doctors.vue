@@ -14,7 +14,7 @@ defineProps({
 <template>
     <Head title="Doctor's List" />
    <AuthenticatedLayout>
-      <div class="max-w-screen m-6">
+      <div class="max-w-screen m-2">
         <div class="flex justify-between items-center">
               <h2 class="text-xl font-semibold text-gray-800">Doctors List</h2>
               <DoctorsForm />

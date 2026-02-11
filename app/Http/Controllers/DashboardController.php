@@ -20,11 +20,17 @@ class DashboardController extends Controller
         $doctorsCount = $this->service->doctorsCount();
         $usersCount = $this->service->totalRegisteredUsers();
         $totalPendingAppointments = $this->service->totalPendingAppointments();
+        $doctorsUpcomingAppointment = $this->service->doctorsUpcomingAppointment();
+        $monthlyAppointments = $this->service->monthlyAppointmentCount();
+        $appointmentStatusCount = $this->service->appointmentStatusAnalytics();
 
         return Inertia::render('Dashboard', [
             'doctorsCount' => $doctorsCount,
             'usersCount' => $usersCount,
-            'appPendingCount' => $totalPendingAppointments
+            'appPendingCount' => $totalPendingAppointments,
+            'upcomingAppointment' => $doctorsUpcomingAppointment,
+            'monthlyAppointmentCount' => $monthlyAppointments,
+            'appointmentStatusCount' => $appointmentStatusCount
         ]);
     }
 }
