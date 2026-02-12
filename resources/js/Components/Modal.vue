@@ -26,11 +26,9 @@ watch(
         if (props.show) {
             document.body.style.overflow = 'hidden';
             showSlot.value = true;
-
             dialog.value?.showModal();
         } else {
             document.body.style.overflow = '';
-
             setTimeout(() => {
                 dialog.value?.close();
                 showSlot.value = false;
@@ -46,20 +44,14 @@ const close = () => {
 };
 
 const closeOnEscape = (e) => {
-    if (e.key === 'Escape') {
-        e.preventDefault();
-
-        if (props.show) {
-            close();
-        }
+    if (e.key === 'Escape' && props.show) {
+        close();
     }
 };
 
 onMounted(() => document.addEventListener('keydown', closeOnEscape));
-
 onUnmounted(() => {
     document.removeEventListener('keydown', closeOnEscape);
-
     document.body.style.overflow = '';
 });
 
@@ -77,21 +69,26 @@ const maxWidthClass = computed(() => {
 <template>
     <dialog class="z-50 m-0 min-h-screen w-full bg-transparent p-0" ref="dialog">
         <div class="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-0">
-            <!-- Backdrop -->
-            <Transition enter-active-class="ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100"
-                leave-active-class="ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
-                <div v-show="showSlot" class="absolute inset-0 bg-gray-500 bg-opacity-75" @click="close" />
+            <Transition 
+                enter-active-class="ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100"
+                leave-active-class="ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0"
+            >
+                <div v-show="showSlot" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="close" />
             </Transition>
 
-            <!-- Modal Content -->
-            <Transition enter-active-class="ease-out duration-300"
+            <Transition 
+                enter-active-class="ease-out duration-300"
                 enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                enter-to-class="opacity-100 translate-y-0 sm:scale-100" leave-active-class="ease-in duration-200"
+                enter-to-class="opacity-100 translate-y-0 sm:scale-100" 
+                leave-active-class="ease-in duration-200"
                 leave-from-class="opacity-100 translate-y-0 sm:scale-100"
-                leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                <div v-show="showSlot"
-                    class="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all w-full sm:w-auto"
-                    :class="maxWidthClass">
+                leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+                <div 
+                    v-show="showSlot"
+                    class="relative transform overflow-hidden rounded-[2.5rem] bg-slate-50 shadow-2xl transition-all w-full sm:w-auto border border-white"
+                    :class="maxWidthClass"
+                >
                     <slot v-if="showSlot" />
                 </div>
             </Transition>

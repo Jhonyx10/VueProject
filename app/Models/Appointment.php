@@ -6,9 +6,12 @@ use MongoDB\Laravel\Eloquent\Model;
 use MongoDB\Laravel\Relations\BelongsTo;
 use MongoDB\Laravel\Relations\hasOne;
 use App\Enums\AppointmentStatus;
+use MongoDB\Laravel\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
+    use SoftDeletes;
+
     protected $connection = 'mongodb';
 
     protected $collection = 'appointments';
@@ -23,6 +26,8 @@ class Appointment extends Model
         'reason',
     ];
 
+    protected $dates = ['deleted_at'];
+    
     protected $casts = [
         'status' => AppointmentStatus::class,
     ];

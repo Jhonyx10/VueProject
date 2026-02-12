@@ -25,20 +25,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
-    Route::resource('chat', ChatController::class);
-    Route::resource('appointments', AppointmentController::class);
-    Route::resource('diagnosis', DiagnosisController::class)->parameters(['diagnosis' => 'diagnosis' ]);
-
-    Route::middleware(['role:admin'])->group(function () {
-        Route::resource('/register/doctor', RegisterDoctorController::class);
-        Route::get('/doctors', [DoctorsController::class, 'index'])->name('doctors');
-        Route::resource('doctor', DoctorsController::class)->except(['index']);
-    });
-
     // Doctor Only Routes
     Route::middleware(['role:doctor'])->group(function () {
         Route::get('/diagnosis/form', [DiagnosisController::class, 'create'])->name('diagnosis.create');
     });
+
+    Route::resource('diagnosis', DiagnosisController::class)->parameters(['diagnosis' => 'diagnosis' ]);
+    Route::resource('chat', ChatController::class);
+    
+    Route::resource('appointments', AppointmentController::class);
+    Route::get('/doctors/profile/{id}', [DoctorsController::class, 'show'])->name('doctors_profile');
+    Route::middleware(['role:admin'])->group(function () {
+        Route::resource('/register/doctor', RegisterDoctorController::class);
+        Route::get('/doctors', [DoctorsController::class, 'index'])->name('doctors');
+        Route::resource('doctor', DoctorsController::class)->except(['index', 'show']);
+    });
+
 
     // User Only Routes
     Route::middleware(['role:user'])->group(function () {

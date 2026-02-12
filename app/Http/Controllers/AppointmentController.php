@@ -19,6 +19,7 @@ class AppointmentController extends Controller
     {
         return Inertia::render('Appointments', [
             'appointments' => Appointment::with(['doctor.doctorProfile', 'patient'])
+                ->where('status', '!=', 'complete')
                 ->orderBy('date')->get(),
             
             'doctors' => User::where('role', 'doctor')
@@ -77,6 +78,8 @@ class AppointmentController extends Controller
         $status = match($request->action) {
             'confirm' => AppointmentStatus::CONFIRMED->value,
             'cancel'  => AppointmentStatus::CANCELLED->value,
+            'expire'  => AppointmentStatus::EXPIRED->value,
+            'expired'   => AppointmentStatus::EXPIRED->value,
             default   => $appointment->status,
         };
 
@@ -85,9 +88,12 @@ class AppointmentController extends Controller
             'reason' => $request->action === 'cancel' ? $request->reason : null
         ]);
 
-        $message = $request->action === 'cancel' 
-            ? 'Appointment cancelled.' 
-            : 'Appointment confirmed successfully!';
+        $message = match($request->action) {
+            'cancel' => 'Appointment cancelled.',
+            'expire' => 'Appointment has expired.',
+            'confirm' => 'Appointment confirmed successfully!',
+            default   => 'Appointment updated successfully.'
+        };
 
         return redirect()->back()->with('success', $message);
     }
@@ -96,6 +102,18 @@ class AppointmentController extends Controller
      */
     public function destroy(Appointment $appointment)
     {
-        //
+        try {
+            $user = Auth::user();
+            
+            if ($user->role === 'user' && $appointment->patient_id !== $user->id) {
+                return redirect()->back()->with('error', 'Unauthorized to delete this appointment.');
+            }
+            
+            $appointment->delete();
+
+            return redirect()->back()->with('success', 'Appointment successfully removed from the schedule.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to delete appointment.');
+        }
     }
 }

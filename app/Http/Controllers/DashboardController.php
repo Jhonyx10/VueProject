@@ -21,6 +21,7 @@ class DashboardController extends Controller
         $usersCount = $this->service->totalRegisteredUsers();
         $totalPendingAppointments = $this->service->totalPendingAppointments();
         $doctorsUpcomingAppointment = $this->service->doctorsUpcomingAppointment();
+        $usersUpcomingAppointment = $this->service->usersUpcomingAppointment();
         $monthlyAppointments = $this->service->monthlyAppointmentCount();
         $appointmentStatusCount = $this->service->appointmentStatusAnalytics();
 
@@ -29,6 +30,7 @@ class DashboardController extends Controller
             'usersCount' => $usersCount,
             'appPendingCount' => $totalPendingAppointments,
             'upcomingAppointment' => $doctorsUpcomingAppointment,
+            'userUpcomingAppointment' => $usersUpcomingAppointment,
             'monthlyAppointmentCount' => $monthlyAppointments,
             'appointmentStatusCount' => $appointmentStatusCount
         ]);

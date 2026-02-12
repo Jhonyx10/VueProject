@@ -35,6 +35,19 @@ class AnalyticService
         ->first();
     }
 
+    public function usersUpcomingAppointment()
+    {
+        $userId = (string) Auth::id();
+
+        return Appointment::with(['doctor.doctorProfile', 'patient']) 
+            ->where('patient_id', $userId)
+            ->where('date', '>=', now()->toDateString())
+            ->whereNotIn('status', ['cancelled', 'complete', 'rejected']) 
+            ->orderBy('date', 'asc') 
+            ->orderBy('time', 'asc') 
+            ->first();
+    }
+
     public function monthlyAppointmentCount()
     {
         $results = Appointment::raw(function($collection) {

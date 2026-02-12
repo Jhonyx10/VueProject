@@ -55,9 +55,13 @@ class DoctorsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Doctors $doctors)
+    public function show($id)
     {
-        //
+            $doctor = User::with('doctorProfile')->findOrFail($id);
+
+        return Inertia::render('Doctors/DoctorsProfile', [
+            'doctor' => $doctor
+        ]);
     }
 
     /**

@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use MongoDB\Laravel\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use MongoDB\Laravel\Eloquent\Model;
-use MongoDB\Laravel\Relations\hasOne;
+use MongoDB\Laravel\Relations\HasMany;
+use MongoDB\Laravel\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    // use HasFactory, Notifiable;
-    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -47,16 +47,28 @@ class User extends Authenticatable
         return $this->hasOne(Doctor::class, 'user_id');
     }
     
-     public function doctor(): belongsTo
+     public function doctorDiagnoses(): HasMany
     {
-        return $this->belongsTo(Diagnosis::class, 'doctor_id');
+        return $this->hasMany(Diagnosis::class, 'doctor_id');
+    }
+ 
+     public function patientRecords(): HasMany
+    {
+        return $this->hasMany(Diagnosis::class, 'patient_id');
     }
 
-     public function patient(): belongsTo
+    public function appointments(): HasMany
     {
-        return $this->belongsTo(Diagnosis::class, 'patient_id');
+        return $this->hasMany(Appointment::class, 'patient_id');
     }
 
+    /**
+     * Get the appointments where this user is the doctor.
+     */
+    public function scheduledConsultations(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'doctor_id');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

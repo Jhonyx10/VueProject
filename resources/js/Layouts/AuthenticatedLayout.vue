@@ -73,6 +73,22 @@
             <span class="font-semibold tracking-wide text-sm">Appointments</span>
         </NavLink>
 
+        <NavLink :href="route('diagnosis.index')" :active="route().current('diagnosis.index')"
+            class="group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ease-out overflow-hidden"
+            :class="route().current('diagnosis.index')
+                ? 'bg-indigo-600 shadow-lg shadow-indigo-200 text-white w-full'
+                : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-indigo-600 w-full'">
+        
+            <div v-if="route().current('diagnosis.index')" 
+                class="absolute left-0 top-3 bottom-3 w-1 bg-white rounded-r-full">
+            </div>
+
+            <CalendarDaysIcon class="h-5 w-5 transition-transform duration-300" 
+                :class="route().current('diagnosis.index') ? 'scale-110' : 'group-hover:scale-110'" />
+        
+            <span class="font-semibold tracking-wide text-sm">Medical Records</span>
+        </NavLink>
+
          <NavLink :href="route('chat.index')" :active="route().current('chat.index')"
                 class="group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ease-out overflow-hidden"
                 :class="route().current('chat.index')

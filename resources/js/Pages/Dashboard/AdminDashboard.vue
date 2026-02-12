@@ -15,7 +15,13 @@ const props = defineProps({
 <template>
     <div class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
+            <div 
+                v-motion
+                :initial="{ opacity: 0, y: 20 }"
+                :enter="{ opacity: 1, y: 0, transition: { delay: 100 } }"
+                :hover="{ y: -5, transition: { type: 'spring', stiffness: 300 } }"
+                class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 transition-shadow hover:shadow-md"
+            >
                 <div class="p-6 flex items-center">
                     <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,10 +35,16 @@ const props = defineProps({
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
+            <div 
+                v-motion
+                :initial="{ opacity: 0, y: 20 }"
+                :enter="{ opacity: 1, y: 0, transition: { delay: 200 } }"
+                :hover="{ y: -5, transition: { type: 'spring', stiffness: 300 } }"
+                class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 transition-shadow hover:shadow-md"
+            >
                 <div class="p-6 flex items-center">
                     <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
@@ -43,10 +55,16 @@ const props = defineProps({
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100">
+            <div 
+                v-motion
+                :initial="{ opacity: 0, y: 20 }"
+                :enter="{ opacity: 1, y: 0, transition: { delay: 300 } }"
+                :hover="{ y: -5, transition: { type: 'spring', stiffness: 300 } }"
+                class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-100 transition-shadow hover:shadow-md"
+            >
                 <div class="p-6 flex items-center">
                     <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
@@ -59,7 +77,12 @@ const props = defineProps({
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-2 bg-white p-6 shadow-sm sm:rounded-lg border border-gray-100">
+            <div 
+                v-motion
+                :initial="{ opacity: 0, x: -20 }"
+                :enter="{ opacity: 1, x: 0, transition: { delay: 400, duration: 800 } }"
+                class="md:col-span-2 bg-white p-6 shadow-sm sm:rounded-lg border border-gray-100"
+            >
                 <h3 class="mb-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Appointments Growth</h3>
                 <div class="h-[400px]">
                     <BarChart v-if="monthlyAppointmentCount.length" :monthlyAppointmentCount="monthlyAppointmentCount" />
@@ -67,7 +90,12 @@ const props = defineProps({
                 </div>
             </div>
 
-            <div class="md:col-span-1 bg-white p-6 shadow-sm sm:rounded-lg border border-gray-100">
+            <div 
+                v-motion
+                :initial="{ opacity: 0, x: 20 }"
+                :enter="{ opacity: 1, x: 0, transition: { delay: 500, duration: 800 } }"
+                class="md:col-span-1 bg-white p-6 shadow-sm sm:rounded-lg border border-gray-100"
+            >
                 <h3 class="mb-4 text-sm font-medium text-gray-600 uppercase tracking-wider">Status Distribution</h3>
                 <div class="h-[400px]">
                     <PieChart v-if="appointmentStatusCount.length" :appointmentStatusCount="appointmentStatusCount" />

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Diagnosis;
+use App\Models\User;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
 use App\Http\Requests\DiagnosisRequest;
@@ -17,7 +18,24 @@ class DiagnosisController extends Controller
      */
     public function index()
     {
-        //
+        $patients = User::where('role', 'user')
+            ->with([
+                'patientRecords.doctor.doctorProfile', 
+                // Filter the relationship so only completed appointments are loaded
+                'appointments' => function ($query) {
+                    $query->where('status', 'complete');
+                }
+            ])
+            // Optional: Only return patients who actually HAVE a completed appointment
+            ->whereHas('appointments', function ($query) {
+                $query->where('status', 'complete');
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
+        return Inertia::render('Diagnosis', [
+            'patients' => $patients
+        ]);
     }
 
     /**
