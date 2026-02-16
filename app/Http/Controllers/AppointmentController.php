@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\User;
+use App\Models\ChatRoom;
 use Illuminate\Http\Request;
 use App\Http\Requests\AppointmentRequest;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Enums\AppointmentStatus;
+use App\Events\AppointmentNotificationEvent;
+use App\Events\AppointmentStatusEvent;
 
 class AppointmentController extends Controller
 {
@@ -21,10 +24,6 @@ class AppointmentController extends Controller
             'appointments' => Appointment::with(['doctor.doctorProfile', 'patient'])
                 ->where('status', '!=', 'complete')
                 ->orderBy('date')->get(),
-            
-            'doctors' => User::where('role', 'doctor')
-                ->with('doctorProfile') 
-                ->get(['_id']) 
         ]);
     }
 
@@ -42,16 +41,32 @@ class AppointmentController extends Controller
     public function store(AppointmentRequest $request)
     {
         $data = $request->validated();
+        $userId = Auth::id();
 
-        $data['user_id'] = Auth::id();
+        $appointment = Appointment::create(array_merge($data, [
+            'patient_id' => $userId,
+            'user_id'    => $userId,
+            'status'     => 'pending',
+        ]));
 
-        Appointment::create(array_merge($data, [
-        'patient_id' => Auth::id(),
-        'status'     => 'pending',
-    ]));
+        $participants = [
+            (string) $userId, 
+            (string) $data['doctor_id'] 
+        ];
 
-    return redirect()->back()->with('success', 'Appointment booked successfully!');
+        // Check if a room already exists for these participants
+        $existingRoom = ChatRoom::where('participants', 'all', $participants)->first();
 
+        if (!$existingRoom) {
+            ChatRoom::create([
+                'appointment_id' => $appointment->id,
+                'participants'   => $participants,
+            ]);
+        }
+
+        event(new AppointmentNotificationEvent($appointment, 'New appointment request received!'));
+        
+        return redirect()->back()->with('success', 'Appointment booked and chat room opened!');
     }
 
     /**
@@ -59,7 +74,9 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        //
+        return Inertia::render('Appointments/Show', [
+            'appointment' => $appointment->load(['doctor.doctorProfile', 'patient']),
+        ]);
     }
 
     /**
@@ -78,7 +95,6 @@ class AppointmentController extends Controller
         $status = match($request->action) {
             'confirm' => AppointmentStatus::CONFIRMED->value,
             'cancel'  => AppointmentStatus::CANCELLED->value,
-            'expire'  => AppointmentStatus::EXPIRED->value,
             'expired'   => AppointmentStatus::EXPIRED->value,
             default   => $appointment->status,
         };
@@ -94,6 +110,9 @@ class AppointmentController extends Controller
             'confirm' => 'Appointment confirmed successfully!',
             default   => 'Appointment updated successfully.'
         };
+
+        $recipientId = Auth::id() == $appointment->patient_id ? $appointment->doctor_id : $appointment->patient_id;
+        event(new AppointmentStatusEvent($appointment, $message, $recipientId));
 
         return redirect()->back()->with('success', $message);
     }

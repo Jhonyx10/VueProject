@@ -29,7 +29,7 @@ class AnalyticService
         return Appointment::with('patient')
         ->where('doctor_id', Auth::id())
         ->where('date', '>=', now()->toDateString()) 
-        ->whereNotIn('status', ['cancelled', 'complete']) 
+        ->where('status', 'confirmed') 
         ->orderBy('date', 'asc') 
         ->orderBy('time', 'asc') 
         ->first();

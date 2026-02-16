@@ -56,7 +56,9 @@ const filteredPatients = computed(() => {
                         </span>
                     </div>
 
-                    <div class="relative w-full md:w-80 group">
+                    <div
+                    v-if="!isUser"
+                     class="relative w-full md:w-80 group">
                         <MagnifyingGlassIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                         <input 
                             type="text" 
@@ -85,7 +87,7 @@ const filteredPatients = computed(() => {
                             <tbody class="divide-y divide-slate-50">
                                 <tr 
                                     v-for="(patient, index) in filteredPatients" 
-                                    :key="patient.id"
+                                    :key="patient._id"
                                     v-motion
                                     :initial="{ opacity: 0, x: -10 }"
                                     :enter="{ opacity: 1, x: 0, transition: { delay: 200 + (index * 50) } }"

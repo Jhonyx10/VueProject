@@ -1,6 +1,9 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
+import BookedAppointment from "@/Pages/Appointments/BookedAppointment.vue";
+import { ref } from "vue";
+import { useRole } from '@/composables/useRole.js';
 import {
     ChevronLeftIcon,
     EnvelopeIcon,
@@ -12,6 +15,9 @@ import {
     CalendarIcon,
     ExclamationCircleIcon,
 } from "@heroicons/vue/24/outline";
+
+const showModal = ref(false);
+const { isAdmin } = useRole();
 
 const props = defineProps({
     doctor: {
@@ -161,6 +167,11 @@ const props = defineProps({
                                 class="mt-10 flex flex-wrap gap-4 justify-center md:justify-start"
                             >
                                 <button
+                                v-if="!isAdmin"
+                                v-motion
+                                :hover="{ scale: 1.05 }"
+                                :tap="{ scale: 0.95 }"
+                                @click="showModal = true"
                                     class="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95"
                                 >
                                     Schedule Appointment
@@ -353,5 +364,10 @@ const props = defineProps({
                 </div>
             </div>
         </div>
+        <BookedAppointment 
+            :show="showModal" 
+            :doctor="doctor" 
+            @close="showModal = false" 
+        />
     </AuthenticatedLayout>
 </template>

@@ -10,6 +10,7 @@ use App\Http\Controllers\DiagnosisController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Broadcast;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -22,22 +23,30 @@ Route::get('/', function () {
 
 // Main Auth Group
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {
+        return Broadcast::auth($request);
+    });
     
    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+
+    Route::get('/doctors', [DoctorsController::class, 'index'])->name('doctors');
 
     // Doctor Only Routes
     Route::middleware(['role:doctor'])->group(function () {
         Route::get('/diagnosis/form', [DiagnosisController::class, 'create'])->name('diagnosis.create');
     });
 
-    Route::resource('diagnosis', DiagnosisController::class)->parameters(['diagnosis' => 'diagnosis' ]);
+    Route::resource('diagnosis', DiagnosisController::class)->parameters(['diagnosis' => 'diagnosis' ])->except(['create']);
     Route::resource('chat', ChatController::class);
     
     Route::resource('appointments', AppointmentController::class);
     Route::get('/doctors/profile/{id}', [DoctorsController::class, 'show'])->name('doctors_profile');
-    Route::middleware(['role:admin'])->group(function () {
+
+    // Register other doctor-only routes here if any
+
+    
+    Route::middleware(['role:admin,doctor'])->group(function () {
         Route::resource('/register/doctor', RegisterDoctorController::class);
-        Route::get('/doctors', [DoctorsController::class, 'index'])->name('doctors');
         Route::resource('doctor', DoctorsController::class)->except(['index', 'show']);
     });
 

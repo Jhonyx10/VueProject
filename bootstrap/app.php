@@ -20,11 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // Middleware aliases (Laravel 12 replacement for Kernel.php)
+        // Add this to bypass CSRF for the broadcast auth route
+        $middleware->validateCsrfTokens(except: [
+            'broadcasting/auth',
+        ]);
+
+        // Middleware aliases
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);
-
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

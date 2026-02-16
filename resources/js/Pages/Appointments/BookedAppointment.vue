@@ -5,21 +5,28 @@ import TextInput from '@/Components/TextInput.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { CalendarIcon, ClockIcon, UserIcon, ChatBubbleBottomCenterTextIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { watch } from 'vue'; // Import watch to sync ID
+import { CalendarIcon, ClockIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     show: Boolean,
-    doctors: Array, // Pass your list of doctors here
+    doctor: Object, // Changed from 'doctors: Array' to 'doctor: Object'
 });
 
 const emit = defineEmits(['close']);
 
 const form = useForm({
-    doctor_id: '',
+    doctor_id: props.doctor?._id || props.doctor?.id || '',
     date: '',
     time: '',
     notes: '',
+});
+
+// Watch for modal opening to ensure the correct doctor ID is set
+watch(() => props.show, (isShowing) => {
+    if (isShowing) {
+        form.doctor_id = props.doctor?._id || props.doctor?.id;
+    }
 });
 
 const submit = () => {
@@ -53,20 +60,21 @@ const closeModal = () => {
             <form @submit.prevent="submit" class="p-8 pt-2 space-y-5 bg-white/50 backdrop-blur-sm rounded-t-[2.5rem]">
                 
                 <div class="space-y-1.5">
-                    <InputLabel for="doctor" value="Select Doctor" class="ml-2 text-slate-700 font-bold text-xs uppercase tracking-wider" />
-                    <select
-                        id="doctor"
-                        v-model="form.doctor_id"
-                        class="block w-full border-slate-100 focus:border-indigo-500 focus:ring-indigo-500 rounded-2xl transition-all pl-4 py-3 bg-white shadow-sm text-sm"
-                        required
-                    >
-                        <option value="" disabled>Choose a specialist...</option>
-                        <option v-for="doctor in doctors" :key="doctor._id || doctor.id" :value="doctor._id || doctor.id">
-                            Dr. {{ doctor.doctor_profile?.firstName }} {{ doctor.doctor_profile?.lastName }} 
-                            — {{ doctor.doctor_profile?.expertise || 'General Practice' }}
-                        </option>
-                    </select>
-                    <InputError :message="form.errors.doctor_id" />
+                    <InputLabel value="Selected Specialist" class="ml-2 text-slate-700 font-bold text-xs uppercase tracking-wider" />
+                    <div class="flex items-center gap-3 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
+                        <div class="h-10 w-10 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+                            {{ doctor.doctor_profile?.firstName?.charAt(0) || doctor.name.charAt(0) }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-black text-indigo-900">
+                                Dr. {{ doctor.doctor_profile?.firstName }} {{ doctor.doctor_profile?.lastName }}
+                            </p>
+                            <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-tight">
+                                {{ doctor.doctor_profile?.expertise || 'General Practice' }}
+                            </p>
+                        </div>
+                    </div>
+                    <input type="hidden" v-model="form.doctor_id" />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">

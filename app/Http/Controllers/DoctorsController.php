@@ -16,7 +16,9 @@ class DoctorsController extends Controller
      */
     public function index()
     {
-        $doctors = User::where('role','doctor')->orderByDesc('created_at')->get();
+        $doctors = User::with('doctorProfile')
+                        ->where('role','doctor')
+                        ->orderByDesc('created_at')->get();
 
         return Inertia::render('Doctors', [
             'doctors' => $doctors
@@ -37,17 +39,16 @@ class DoctorsController extends Controller
     public function store(DoctorsRequest $request)
     {
         $data = $request->validated();
-
         $data['user_id'] = Auth::id();
 
         $doctor = Doctor::updateOrCreate(
-        ['user_id' => Auth::id()], 
-        $data
+            ['user_id' => Auth::id()], 
+            $data
         );
 
         $message = $doctor->wasRecentlyCreated 
-        ? 'Professional profile created successfully.' 
-        : 'Professional profile updated successfully.';
+            ? 'Professional profile created successfully.' 
+            : 'Professional profile updated successfully.';
 
         return redirect()->back()->with('success', $message);
     }
@@ -57,7 +58,7 @@ class DoctorsController extends Controller
      */
     public function show($id)
     {
-            $doctor = User::with('doctorProfile')->findOrFail($id);
+        $doctor = User::with('doctorProfile')->findOrFail($id);
 
         return Inertia::render('Doctors/DoctorsProfile', [
             'doctor' => $doctor
@@ -67,7 +68,7 @@ class DoctorsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Doctors $doctors)
+    public function edit(Doctor $doctor)
     {
         //
     }
@@ -75,12 +76,10 @@ class DoctorsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Doctors $doctors)
+    public function update(DoctorsRequest $request, Doctor $doctor)
     {
-        $doctor = Doctor::findOrFail($id);
-        
         // Security check: Only the owner or an admin should update this
-        if (Auth::id() !== $doctor->user_id) {
+        if (Auth::id() !== $doctor->user_id && Auth::user()->role !== 'admin') {
             abort(403);
         }
 

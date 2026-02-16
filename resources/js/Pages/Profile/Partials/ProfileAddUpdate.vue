@@ -30,10 +30,17 @@ const form = useForm({
 });
 
 const submitForm = () => {
-    form.post('/doctor', {
-        onSuccess: () => closeModal(),
-        preserveScroll: true,
-    });
+    if (props.doctor && props.doctor.id) {
+        form.put(route('doctor.update', props.doctor.id), {
+            onSuccess: () => closeModal?.(),
+            preserveScroll: true,
+        });
+    } else {
+        form.post(route('doctor.store'), {
+            onSuccess: () => closeModal?.(),
+            preserveScroll: true,
+        });
+    }
 };
 
 </script>

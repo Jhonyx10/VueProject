@@ -20,6 +20,39 @@ const props = defineProps({
 
 const authUser = usePage().props.auth.user;
 
+const currentStatus = ref("all");
+const currentPage = ref(1);
+const itemsPerPage = 5;
+
+// 2. Filter logic (Doctor ownership + Status selection)
+const filteredAppointments = computed(() => {
+    return props.appointments.filter((app) => {
+        const isMyAppointment =
+            app.doctor_id === authUser.id || app.doctor_id === authUser._id;
+        const matchesStatus =
+            currentStatus.value === "all" ||
+            app.status?.toLowerCase() === currentStatus.value;
+        return isMyAppointment && matchesStatus;
+    });
+});
+
+// 3. Pagination logic
+const paginatedSchedule = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredAppointments.value.slice(start, end);
+});
+
+const totalPages = computed(() =>
+    Math.ceil(filteredAppointments.value.length / itemsPerPage)
+);
+
+// Reset page when filter changes
+const setFilter = (status) => {
+    currentStatus.value = status;
+    currentPage.value = 1;
+};
+
 const showCancelModal = ref(false);
 const selectedAppointment = ref(null); // Changed from ID to Object
 
@@ -60,43 +93,78 @@ const formatTime = (time) => {
 
 <template>
     <div class="space-y-6">
-        <div 
+        <div
             v-motion
             :initial="{ opacity: 0, y: -20 }"
             :enter="{ opacity: 1, y: 0 }"
-            class="flex items-center justify-between px-2"
+            class="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2"
         >
             <div>
                 <h2 class="text-2xl font-bold text-slate-800 tracking-tight">
                     Patient Appointments
                 </h2>
                 <p class="text-sm text-slate-500">
-                    You have {{ appointmentCount.length }} consultations scheduled
+                    You have {{ filteredAppointments.length }} consultations
+                    <span v-if="currentStatus !== 'all'"
+                        >mapped to "{{ currentStatus }}"</span
+                    >
                 </p>
             </div>
-            <div class="flex gap-2">
+
+            <div class="flex flex-col items-start md:items-end gap-3">
                 <div
                     v-motion
                     :initial="{ opacity: 0, scale: 0.9 }"
-                    :enter="{ opacity: 1, scale: 1, transition: { delay: 200 } }"
-                    class="bg-white border border-slate-200 px-4 py-2 rounded-2xl shadow-sm text-xs font-bold text-slate-600"
+                    :enter="{
+                        opacity: 1,
+                        scale: 1,
+                        transition: { delay: 200 },
+                    }"
+                    class="bg-white border border-slate-200 px-4 py-2 rounded-2xl shadow-sm text-xs font-bold text-slate-600 inline-block"
                 >
                     Today's Date: {{ new Date().toLocaleDateString() }}
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        v-for="status in [
+                            'all',
+                            'pending',
+                            'confirmed',
+                            'complete',
+                            'cancelled',
+                            'expired',
+                        ]"
+                        :key="status"
+                        @click="setFilter(status)"
+                        :class="
+                            currentStatus === status
+                                ? 'bg-indigo-600 text-white shadow-md'
+                                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                        "
+                        class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                    >
+                        {{ status }}
+                    </button>
                 </div>
             </div>
         </div>
 
         <div
-            v-if="mySchedule.length === 0"
+            v-if="filteredAppointments.length === 0"
             v-motion
             :initial="{ opacity: 0, scale: 0.95 }"
             :enter="{ opacity: 1, scale: 1 }"
             class="bg-white rounded-[32px] border border-dashed border-slate-300 p-16 text-center shadow-sm"
         >
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-slate-50 rounded-3xl mb-4">
+            <div
+                class="inline-flex items-center justify-center w-20 h-20 bg-slate-50 rounded-3xl mb-4"
+            >
                 <CalendarDaysIcon class="w-10 h-10 text-slate-300" />
             </div>
-            <h3 class="text-xl font-bold text-slate-800">No Consultations Yet</h3>
+            <h3 class="text-xl font-bold text-slate-800">
+                No Consultations Yet
+            </h3>
             <p class="text-slate-500 max-w-xs mx-auto">
                 When patients book appointments with you, they will appear here.
             </p>
@@ -104,51 +172,80 @@ const formatTime = (time) => {
 
         <div v-else class="grid gap-4">
             <div
-                v-for="(app, index) in mySchedule"
+                v-for="(app, index) in paginatedSchedule"
                 :key="app._id || app.id"
                 v-motion
                 :initial="{ opacity: 0, x: -30 }"
-                :enter="{ 
-                    opacity: 1, 
-                    x: 0, 
-                    transition: { 
+                :enter="{
+                    opacity: 1,
+                    x: 0,
+                    transition: {
                         delay: index * 120,
                         type: 'spring',
-                        stiffness: 150 
-                    } 
+                        stiffness: 150,
+                    },
                 }"
                 class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row md:items-center gap-6 group"
             >
                 <div
                     v-motion
                     :initial="{ scale: 0.8 }"
-                    :enter="{ scale: 1, transition: { delay: (index * 120) + 200 } }"
+                    :enter="{
+                        scale: 1,
+                        transition: { delay: index * 120 + 200 },
+                    }"
                     class="flex flex-row md:flex-col items-center justify-center bg-slate-50 px-6 py-4 rounded-[2rem] min-w-[120px] gap-2 border border-slate-100"
                 >
                     <span class="text-indigo-600 font-black text-lg">
                         {{ formatTime(app.time) }}
                     </span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        {{ new Date(app.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) }}
+                    <span
+                        class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
+                    >
+                        {{
+                            new Date(app.date).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                            })
+                        }}
                     </span>
                 </div>
 
-                <div class="flex-1 flex items-center gap-4 border-l-0 md:border-l border-slate-100 md:pl-6">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 shrink-0">
+                <div
+                    class="flex-1 flex items-center gap-4 border-l-0 md:border-l border-slate-100 md:pl-6"
+                >
+                    <div
+                        class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 shrink-0"
+                    >
                         <UserIcon class="w-6 h-6" />
                     </div>
                     <div>
-                        <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-0.5">Patient Name</p>
-                        <h4 class="font-bold text-slate-800 text-xl">{{ app.patient?.name || "Guest Patient" }}</h4>
+                        <p
+                            class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-0.5"
+                        >
+                            Patient Name
+                        </p>
+                        <h4 class="font-bold text-slate-800 text-xl">
+                            {{ app.patient?.name || "Guest Patient" }}
+                        </h4>
                     </div>
                 </div>
 
-                <div class="flex-1 bg-slate-50/50 p-4 rounded-2xl border border-slate-50 transition-colors group-hover:bg-slate-50">
+                <div
+                    class="flex-1 bg-slate-50/50 p-4 rounded-2xl border border-slate-50 transition-colors group-hover:bg-slate-50"
+                >
                     <div class="flex items-center gap-2 mb-1">
-                        <ChatBubbleLeftEllipsisIcon class="w-4 h-4 text-slate-400" />
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Reason for visit</span>
+                        <ChatBubbleLeftEllipsisIcon
+                            class="w-4 h-4 text-slate-400"
+                        />
+                        <span
+                            class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter"
+                            >Reason for visit</span
+                        >
                     </div>
-                    <p class="text-sm text-slate-600 line-clamp-2">{{ app.notes || "No specific notes provided." }}</p>
+                    <p class="text-sm text-slate-600 line-clamp-2">
+                        {{ app.notes || "No specific notes provided." }}
+                    </p>
                 </div>
 
                 <div class="flex items-center gap-3">
@@ -157,7 +254,14 @@ const formatTime = (time) => {
                         v-motion
                         :hover="{ scale: 1.1, rotate: 5 }"
                         :tap="{ scale: 0.9 }"
-                        :href="route('diagnosis.create', { appointment_id: app._id || app.id, patient_id: app.patient?._id || app.patient?.id, patient_name: app.patient?.name, notes: app.notes })"
+                        :href="
+                            route('diagnosis.create', {
+                                appointment_id: app._id || app.id,
+                                patient_id: app.patient?._id || app.patient?.id,
+                                patient_name: app.patient?.name,
+                                notes: app.notes,
+                            })
+                        "
                         class="bg-indigo-50 text-indigo-600 p-3 rounded-2xl hover:bg-indigo-100 transition-colors"
                     >
                         <FolderIcon class="w-6 h-6" />
@@ -168,7 +272,11 @@ const formatTime = (time) => {
                         :hover="{ scale: 1.1, backgroundColor: '#ecfdf5' }"
                         method="patch"
                         as="button"
-                        :href="route('appointments.update', { appointment: app._id || app.id })"
+                        :href="
+                            route('appointments.update', {
+                                appointment: app._id || app.id,
+                            })
+                        "
                         :data="{ action: 'confirm' }"
                         class="bg-amber-50 text-amber-600 p-3 rounded-2xl transition-colors flex items-center justify-center"
                     >
@@ -186,13 +294,22 @@ const formatTime = (time) => {
                     </button>
 
                     <div class="flex flex-col">
-                        <span class="text-[10px] font-black uppercase text-slate-400 mb-1 ml-1">Status</span>
+                        <span
+                            class="text-[10px] font-black uppercase text-slate-400 mb-1 ml-1"
+                            >Status</span
+                        >
                         <span
                             :class="{
-                                'bg-amber-100 text-amber-700': app.status === 'pending',
-                                'bg-blue-100 text-blue-700': app.status === 'confirmed',
-                                'bg-green-100 text-green-700': app.status === 'complete',
-                                'bg-red-100 text-red-700': app.status === 'cancelled',
+                                'bg-amber-100 text-amber-700':
+                                    app.status === 'pending',
+                                'bg-blue-100 text-blue-700':
+                                    app.status === 'confirmed',
+                                'bg-green-100 text-green-700':
+                                    app.status === 'complete',
+                                'bg-red-100 text-red-700':
+                                    app.status === 'cancelled',
+                                'bg-red-50 text-red-600 border-red-200':
+                                    app.status === 'expired',
                             }"
                             class="px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase border border-white shadow-sm"
                         >
@@ -202,7 +319,38 @@ const formatTime = (time) => {
                 </div>
             </div>
         </div>
+        <div
+            v-if="totalPages > 1"
+            class="flex items-center justify-center gap-4 pt-6 border-t border-slate-100"
+        >
+            <button
+                :disabled="currentPage === 1"
+                @click="currentPage--"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+            >
+                Previous
+            </button>
 
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400">Page</span>
+                <span
+                    class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-black"
+                >
+                    {{ currentPage }}
+                </span>
+                <span class="text-xs font-bold text-slate-400"
+                    >of {{ totalPages }}</span
+                >
+            </div>
+
+            <button
+                :disabled="currentPage === totalPages"
+                @click="currentPage++"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+            >
+                Next
+            </button>
+        </div>
         <CancellationReason
             :show="showCancelModal"
             :appointment="selectedAppointment"
